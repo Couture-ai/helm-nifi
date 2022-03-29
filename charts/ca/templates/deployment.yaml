@@ -57,7 +57,9 @@ spec:
       - command:
         - sh
         - -c
-        - chown -R 1000:1000 /ca
+      #   - chown -R 1000:1000 /ca
+        - echo "test"
+        
         image: busybox
         imagePullPolicy: IfNotPresent
         name: volume-permissions

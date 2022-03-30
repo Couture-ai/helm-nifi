@@ -49,11 +49,6 @@ sts:
 #        - example.com
 #        - example
 
-  startupProbe:
-    enabled: false
-    failureThreshold: 60
-    periodSeconds: 10
-
 ## Useful if using any custom secrets
 ## Pass in some secrets to use (if required)
 # secrets:
@@ -79,7 +74,8 @@ properties:
   # use externalSecure for when inbound SSL is provided by nginx-ingress or other external mechanism
   externalSecure: false
   isNode: false
-  httpsPort: 8443 
+  httpsPort: 8443
+  httpPort: 8553
   webProxyHost: # <clusterIP>:<NodePort> (If Nifi service is NodePort or LoadBalancer)
   clusterPort: 6007
   provenanceStorage: "8 GB"
@@ -91,6 +87,26 @@ properties:
     nifi.web.http.network.interface.default: eth0
     # listen to loopback interface so "kubectl port-forward ..." works
     nifi.web.http.network.interface.lo: lo
+    # nifi.web.http.host: 3.218.177.110
+    # #couture-nifi.nifi
+    # nifi.web.http.port: 8000
+    nifi.web.https.host: 0.0.0.0
+    nifi.web.https.port: 8443
+    nifi.web.proxy.host: 3.218.177.110:8443, exl.workbench.couture.ai:8443
+
+    # nifi.security.user.oidc.enabled: true
+    # nifi.security.user.oidc.discovery.url: https://dev-20150884.okta.com/oauth2/default/.well-known/openid-configuration
+    # nifi.security.user.oidc.client.id: 0oa43x703sCEEvcWh5d7
+    # nifi.security.user.oidc.client.secret: apXBPmTBlSrfwpDQkNyIUOawa_SLPGGY4TRUSJE4
+    # nifi.security.user.oidc.claimIdentifyingUser: email
+    # nifi.security.user.oidc.admin: deepti.mahesh@couture.ai
+
+  # nifi.web.http.host: 3.218.177.110
+  # #couture-nifi.nifi
+  # nifi.web.http.port: 8000
+  # nifi.web.https.host: 3.218.177.110
+  # nifi.web.https.port: 8443
+  # nifi.web.proxy.host: 3.218.177.110:8443, exl.workbench.couture.ai:443
 
   ## Include aditional processors
   # customLibPath: "/opt/configuration_resources/custom_lib"
@@ -124,12 +140,12 @@ auth:
     authExpiration: 12 hours
 
   oidc:
-    enabled: false
-    discoveryUrl: #http://<oidc_provider_address>:<oidc_provider_port>/auth/realms/<client_realm>/.well-known/openid-configuration
-    clientId: #<client_name_in_oidc_provider>
-    clientSecret: #<client_secret_in_oidc_provider>
+    enabled: true
+    discoveryUrl: https://dev-20150884.okta.com/oauth2/default/.well-known/openid-configuration
+    clientId: 0oa43x703sCEEvcWh5d7
+    clientSecret: apXBPmTBlSrfwpDQkNyIUOawa_SLPGGY4TRUSJE4
     claimIdentifyingUser: email
-    admin: nifi@example.com
+    admin: deepti.mahesh@couture.ai
     ## Request additional scopes, for example profile
     additionalScopes:
 
@@ -164,6 +180,7 @@ headless:
 service:
   type: ClusterIP
   httpsPort: 8443
+  # httpPort: 8080
   # nodePort: 30236
   annotations: {}
     # loadBalancerIP:
@@ -215,6 +232,7 @@ sidecar:
 ##
 persistence:
   enabled: false
+  storageClass: "efs-sc"
 
   # When creating persistent storage, the NiFi helm chart can either reference an already-defined
   # storage class by name, such as "standard" or can define a custom storage class by specifying
@@ -325,11 +343,11 @@ openshift:
 # The ca server will be used to generate self-signed certificates required setting up secured cluster
 ca:
   ## If true, enable the nifi-toolkit certificate authority
-  enabled: false
+  enabled: true
   persistence:
     enabled: true
-  server: ""
-  service:
+  server: couture-nifi-ca.nifi.svc
+  service: 
     port: 9090
   token: sixteenCharacters
   admin:
@@ -358,7 +376,7 @@ zookeeper:
 # ------------------------------------------------------------------------------
 registry:
   ## If true, install the Nifi registry
-  enabled: false
+  enabled: true
   url: ""
   port: 80
   ## Add values for the nifi-registry here
@@ -377,3 +395,4 @@ metrics:
       # namespace: monitoring
       # Additional labels for the ServiceMonitor
       labels: {}
+

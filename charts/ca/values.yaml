@@ -18,6 +18,7 @@ service:
 ##
 persistence:
   enabled: false
+  storageClass: "efs-sc"
 
   # When creating persistent storage, the NiFi helm chart can either reference an already-defined
   # storage class by name, such as "standard" or can define a custom storage class by specifying
